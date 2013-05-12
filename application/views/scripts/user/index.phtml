@@ -1,0 +1,37 @@
+<?php
+/** @var Custom_View $this */
+
+/** @var Model_User_Entity[] $userList */
+$userList = $this->userList;
+?>
+<p class="lead">
+    <a class="btn btn-primary " href="<?php echo $this->url(array('controller' => $this->currentController(), 'action' => 'add'), 'default', true) ?>">Add user</a>
+</p>
+
+
+<section class="userList">
+    <?php foreach ($userList as $userEntity): ?>
+        <?php $userUrl = $this->url(array('module' => $this->currentModule(), 'controller' => $this->currentController(), 'action' => 'item', 'id' => $userEntity->id), 'default', true) ?>
+
+        <div class="media">
+            <a class="pull-left" href="<?php echo $userUrl ?>">
+                <img class="media-object" data-src="holder.js/64x64">
+            </a>
+
+            <div class="media-body">
+                <h4 class="media-heading">
+                    <a href="<?php echo $userUrl ?>">
+                        <?php echo $this->escape($userEntity->name) ?>
+                    </a>
+                </h4>
+                <h5 class="media-heading">
+                    <a href="<?php echo $userUrl ?>">
+                        <?php echo $this->escape($userEntity->email) ?>
+                    </a>
+                </h5>
+                <p>Joined: <?php $date = new Zend_Date($userEntity->timestampAdd); echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?></p>
+            </div>
+        </div>
+
+    <?php endforeach ?>
+</section>

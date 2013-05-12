@@ -1,0 +1,29 @@
+<?php
+/** @var Custom_View $this */
+
+/** @var Model_Comment_Entity[] $commentList */
+$commentList = $this->commentList;
+?>
+
+<section class="commentList">
+    <?php foreach ($commentList as $commentEntity): ?>
+
+        <div class="media">
+
+            <div class="media-body">
+                <h4 class="media-heading">
+                    Topic: <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'topic', 'action' => 'item', 'id' => $commentEntity->topic->id), 'default', true) ?>">
+                        <?php echo $this->escape($commentEntity->topic->title) ?>
+                    </a>
+                </h4>
+                <h5 class="media-heading">
+                    User: <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'user', 'action' => 'item', 'id' => $commentEntity->user->id), 'default', true) ?>">
+                        <?php echo $this->escape($commentEntity->user->name) ?>
+                    </a>
+                </h5>
+                <p><?php echo $this->escape($commentEntity->text) ?></p>
+            </div>
+        </div>
+
+    <?php endforeach ?>
+</section>

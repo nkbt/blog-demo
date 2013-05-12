@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configdata>
+
+    <topic label="Topics" controller="topic" action="index">
+        <pages>
+            <item label="Item" controller="topic" action="item" visible="0"/>
+            <add label="Add" controller="topic" action="add"/>
+            <edit label="Edit" controller="topic" action="edit" visible="0"/>
+        </pages>
+    </topic>
+
+    <comment label="Comments" controller="comment" action="index">
+        <pages>
+            <item label="Item" controller="comment" action="item" visible="0"/>
+            <edit label="Edit" controller="comment" action="edit" visible="0"/>
+        </pages>
+    </comment>
+
+    <user label="Users" controller="user" action="index">
+        <pages>
+            <item label="Item" controller="user" action="item" visible="0"/>
+            <add label="Add" controller="user" action="add"/>
+            <edit label="Edit" controller="user" action="edit" visible="0"/>
+        </pages>
+    </user>
+
+    <admin label="Admin" controller="admin" action="index">
+        <pages>
+            <updateCounts label="Update all counters" controller="admin" action="update-counts"/>
+            <clearCache label="Clear cache" controller="admin" action="clear-cache"/>
+        </pages>
+    </admin>
+
+</configdata>

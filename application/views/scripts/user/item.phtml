@@ -1,0 +1,49 @@
+<?php
+/** @var Custom_View $this */
+
+/** @var Model_Topic_Entity $userEntity */
+$userEntity = $this->userEntity;
+?>
+
+<div class="userList">
+    <div class="media">
+        <span class="pull-left">
+            <img class="media-object" data-src="holder.js/64x64">
+        </span>
+
+        <div class="media-body">
+            <h5 class="media-heading">
+                <a href="<?php echo $userUrl ?>">
+                    <?php echo $this->escape($userEntity->email) ?>
+                </a>
+            </h5>
+            <p>Joined: <?php $date = new Zend_Date($userEntity->timestampAdd); echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?></p>
+        </div>
+
+
+    </div>
+</div>
+
+<h3>User's comments:</h3>
+
+<section class="well commentList">
+    <?php foreach ($userEntity->commentList as $commentEntity): ?>
+
+        <div class="media">
+            <span class="pull-left">
+                <img class="media-object" data-src="holder.js/64x64">
+            </span>
+
+            <div class="media-body">
+                <h5 class="media-heading">
+                    Topic: <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'topic', 'action' => 'item', 'id' => $commentEntity->topic->id), 'default', true) ?>">
+                        <?php echo $this->escape($commentEntity->topic->title) ?>
+                    </a>
+                </h5>
+
+                <p><?php echo $this->escape($commentEntity->text) ?></p>
+            </div>
+        </div>
+
+    <?php endforeach ?>
+</section>
