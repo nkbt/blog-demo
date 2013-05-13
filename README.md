@@ -6,10 +6,14 @@ Simple example of event-based models using PHP/Zend Framework 1.12, Redis and No
 Installation
 ====
 
-Requirements: PHP5, MySQL5, Redis, NodeJS, PHPRedis.
-
-1. Run server (http://blog.lc)
-2. Create database "blog"
-3. Go to http://blog.lc/setup.php
-4. ???
-5. PROFIT
+1. Install [Vagrant](http://www.vagrantup.com/)
+2. Add Precise64 box:
+    vagrant box add precise64 http://files.vagrantup.com/precise64.box
+3. Add salt plugin:
+    vagrant plugin install vagrant-salt
+4. Checkout project:
+    git clone git://github.com/nkbt/blog-demo.git blog-demo
+5. Run vagrant:
+    cd blog-demo
+    vagrant up
+6. Go to http://localhost:10080

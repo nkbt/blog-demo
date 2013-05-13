@@ -1,19 +1,91 @@
 <?php
+$config = array(
+	'APP_ENV' => 'development',
+	'APP_ROOT' => '/../application',
+	'LIB_ROOT' => '/../library',
+	'ZEND_ROOT' => '/../library',
+	'CACHE_ENABLED' => 0,
+	'DEBUG' => 0,
+);
+
+$appEnv = getenv('APP_ENV');
+if (!$appEnv) {
+	$appEnv = $config['APP_ENV'];
+}
+define('APP_ENV', $appEnv);
+
 /**
- * Script for creating and loading database
+ * @global
  */
+$env = getenv('APP_ROOT');
+if (!$env) {
+	$env = $config['APP_ROOT'];
+}
+$path = realpath($env);
+if (!$path) {
+	$path = realpath(dirname(__FILE__) . $env);
+}
+if (!$path) {
+	throw new Exception("'APP_ROOT' not found: $env");
+}
+define('APP_ROOT', rtrim($path, DIRECTORY_SEPARATOR));
+
+$env = getenv('LIB_ROOT');
+if (!$env) {
+	$env = $config['LIB_ROOT'];
+}
+$path = realpath($env);
+if (!$path) {
+	$path = realpath(dirname(__FILE__) . $env);
+}
+if (!$path) {
+	throw new Exception("'LIB_ROOT' not found: $env");
+}
+define('LIB_ROOT', rtrim($path, DIRECTORY_SEPARATOR));
+
+$env = getenv('ZEND_ROOT');
+if (!$env) {
+	$env = $config['ZEND_ROOT'];
+}
+$path = realpath($env);
+if (!$path) {
+	$path = realpath(dirname(__FILE__) . $env);
+}
+if (!$path) {
+	throw new Exception("'ZEND_ROOT' not found: " . dirname(__FILE__) . $env);
+}
+define('ZEND_ROOT', rtrim($path, DIRECTORY_SEPARATOR));
+
+define('DOC_ROOT', rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR));
+
+$env = getenv('WEB_ROOT');
+define('WEB_ROOT', $env);
+define('PROJECT_ROOT', rtrim(realpath(APP_ROOT . '/..'), DIRECTORY_SEPARATOR));
+define('CORE_NULL', null);
+define('POST', 'POST');
+define('GET', 'GET');
+define('EMPTY_GIF', '/img/empty.gif');
+define('EMPTY_GIF_PATH', DOC_ROOT . EMPTY_GIF);
+
+$env = getenv('CACHE_ENABLED');
+define('CACHE_ENABLED', $env !== false ? $env : $config['CACHE_ENABLED']);
+
+require_once LIB_ROOT . '/Core/Cookie.php';
+if (Core_Cookie::get('DEBUG') == 1) {
+	$env = 1;
+} else {
+	$env = getenv('DEBUG');
+}
+define('DEBUG', $env !== false ? $env : $config['DEBUG']);
+
+$includePath = get_include_path();
+if (strpos(PATH_SEPARATOR . $includePath . PATH_SEPARATOR, PATH_SEPARATOR . ZEND_ROOT . PATH_SEPARATOR) === false) {
+	set_include_path(ZEND_ROOT . PATH_SEPARATOR . $includePath);
+}
 
 // Initialize the application path and autoloading
 defined('APPLICATION_PATH')
     || define('APPLICATION_PATH', realpath(dirname(__FILE__) . '/../application'));
-set_include_path(
-    implode(
-        PATH_SEPARATOR, array(
-            APPLICATION_PATH . '/../library',
-            get_include_path(),
-        )
-    )
-);
 require_once 'Zend/Loader/Autoloader.php';
 Zend_Loader_Autoloader::getInstance();
 
@@ -60,10 +132,6 @@ $dbAdapter = $bootstrap->getResource('db');
 // database here)
 if ('testing' != APPLICATION_ENV) {
     echo 'Writing Database in (control-c to cancel): ' . PHP_EOL;
-    for ($x = 5; $x > 0; $x--) {
-        echo $x . "\r";
-        sleep(1);
-    }
 }
 
 // Check to see if we have a database file already

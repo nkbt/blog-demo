@@ -25,3 +25,4 @@ Desktop.ini
 application/caches/*
 public/files/_tmp/*
 .zfproject.xml
+.vagrant
