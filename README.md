@@ -6,7 +6,7 @@ Simple example of event-based models using PHP/Zend Framework 1.12, Redis and No
 Installation
 ====
 
-1. Install [Vagrant](http://www.vagrantup.com/)
+1. Install [Vagrant](http://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/)
 2. Add Precise64 box:
     vagrant box add precise64 http://files.vagrantup.com/precise64.box
 3. Add salt plugin:
