@@ -25,3 +25,15 @@ Installation
         vagrant up
     
 6. Go to [http://localhost:10080](http://localhost:10080)
+
+
+TODO
+====
+
+- [x] Get working LAMP stack
+- [x] Base PHP core with sample data, running site
+- [x] Redis and PHPRedis
+- [ ] NodeJS 0.10 or newer
+- [ ] NPM
+- [ ] Forever
+- [ ] Running Node app
