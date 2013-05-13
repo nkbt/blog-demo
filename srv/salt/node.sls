@@ -133,3 +133,8 @@ reload-apache:
 prefill-database:
   cmd.run:
     - name: php /vagrant/scripts/load.php --withdata
+
+latest-node:
+  cmd.run:
+    - name: /vagrant/srv/setup/node.sh
+    - unless: "ls /etc/apt/sources.list.d | grep chris-lea"
