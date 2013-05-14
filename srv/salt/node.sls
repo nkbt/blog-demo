@@ -89,20 +89,20 @@ dbconfig:
 git:
   pkg.installed
 
-nodejs:
-  pkg.installed
-
-npm:
-  pkg.installed
 
 build-essential:
   pkg.installed
 
+
 redis-server:
   pkg.installed
+  - require_in:
+    - phpredis
+
 
 unzip:
   pkg.installed
+
 
 phpredis:
   cmd.run:
@@ -134,7 +134,25 @@ prefill-database:
   cmd.run:
     - name: php /vagrant/scripts/load.php --withdata
 
-latest-node:
+latest-node-add-repo:
   cmd.run:
-    - name: /vagrant/srv/setup/node.sh
+    - name: add-apt-repository -y ppa:chris-lea/node.js
     - unless: "ls /etc/apt/sources.list.d | grep chris-lea"
+    - require_in:
+      - nodejs
+      - npm
+
+nodejs:
+  pkg.installed
+  - require_in:
+    - forever
+
+npm:
+  pkg.installed
+  - require_in:
+    - forever
+
+forever:
+  cmd.run:
+    - name: npm install -g forever
+    - unless: "npm ls -g | grep forever"
