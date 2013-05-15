@@ -11,12 +11,10 @@ php5-pkgs:
       - php5-gd
 
 apache2:
-  pkg:
-    - installed
+  pkg.installed
 
 libapache2-mod-php5:
-  pkg:
-    - installed
+  pkg.installed:
     - require:
       - pkg: apache2
     - require_in:
@@ -95,9 +93,9 @@ build-essential:
 
 
 redis-server:
-  pkg.installed
-  - require_in:
-    - phpredis
+  pkg.installed:
+    - require_in:
+      - phpredis
 
 
 unzip:
@@ -143,14 +141,14 @@ latest-node-add-repo:
       - npm
 
 nodejs:
-  pkg.installed
-  - require_in:
-    - forever
+  pkg.installed:
+    - require_in:
+      - forever
 
 npm:
-  pkg.installed
-  - require_in:
-    - forever
+  pkg.installed:
+    - require_in:
+      - forever
 
 forever:
   cmd.run:
