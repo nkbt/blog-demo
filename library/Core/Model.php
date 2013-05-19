@@ -20,7 +20,7 @@ class Core_Model
     final public function __construct()
     {
 
-        if (APPLICATION_ENV === 'development') {
+        if (APP_ENV === 'development') {
 
             try {
                 throw new Core_Model_Entity_Exception();

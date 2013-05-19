@@ -28,6 +28,7 @@
         <pages>
             <updateCounts label="Update all counters" controller="admin" action="update-counts"/>
             <clearCache label="Clear cache" controller="admin" action="clear-cache"/>
+            <redis label="Redis" uri="/redis"/>
         </pages>
     </admin>
 
