@@ -6,6 +6,7 @@
  * @property string                 title
  * @property string                 text
  * @property int                    timestampAdd
+ * @property bool                   isDeleted
  * @property Model_User_Entity      user
  * @property Model_Comment_Entity[] commentList
  */
@@ -93,7 +94,11 @@ class Model_Topic_Entity extends Core_Model_Entity
     protected function _getCommentList()
     {
 
-        return Core_Model_Factory::get('Comment')->fetchAll(array('idTopic' => $this->id), array('timestampAdd' => 'desc'));
+        try {
+            return Core_Model_Factory::get('Comment')->fetchAll(array('idTopic' => $this->id), array('timestampAdd' => 'desc'));
+        } catch (Core_Model_Exception_Empty $exc) {
+            return array();
+        }
     }
 
 

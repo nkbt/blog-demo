@@ -1,5 +1,4 @@
 #!/bin/bash
-#
 
 cd /tmp
 add-apt-repository -y ppa:chris-lea/node.js

@@ -42,8 +42,9 @@ abstract class Core_Model_Entity
             $comment = $reflection->getDocComment();
             foreach ($reflection->getDefaultProperties() as $property => $value) {
                 $publicName = trim($property, '_');
-                if ($publicName !== 'id' && !preg_match("~\@property\s+[a-zA-Z_]+\s+$publicName~m", $comment)) {
-                    throw new Core_Model_Entity_Exception("Class comment '@property propertyType $publicName' is missing");
+                if ($publicName !== 'id' && !preg_match("~\@property\s+[a-zA-Z_\[\]]+\s+$publicName~m", $comment)) {
+                    $className = get_class($this);
+                    throw new Core_Model_Entity_Exception("Class comment '@property propertyType $publicName' is missing in $className");
                 }
             }
         }

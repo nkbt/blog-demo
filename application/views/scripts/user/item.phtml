@@ -13,7 +13,7 @@ $userEntity = $this->userEntity;
 
         <div class="media-body">
             <h5 class="media-heading">
-                <a href="<?php echo $userUrl ?>">
+                <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'user', 'action' => 'item', 'id' => $userEntity->id), 'default', true) ?>">
                     <?php echo $this->escape($userEntity->email) ?>
                 </a>
             </h5>

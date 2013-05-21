@@ -1,5 +1,4 @@
 #!/bin/bash
-#
 
 cd /tmp
 wget https://github.com/nicolasff/phpredis/zipball/master -O phpredis.zip
