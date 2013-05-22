@@ -1,0 +1,19 @@
+{
+	"name": "event-based-models",
+	"description": "Event based models",
+	"version": "0.0.1",
+	"private": true,
+	"author": {
+		"name": "Nik Butenko",
+		"email": "nikita.butenko@gmail.com"
+	},
+	"scripts": {
+		"start": "supervisor -e \"js\" app.js"
+	},
+	"dependencies": {
+		"redis": "*",
+		"glob": "*"
+	},
+	"readmeFilename": "README.md"
+
+}

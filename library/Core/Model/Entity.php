@@ -28,13 +28,18 @@ abstract class Core_Model_Entity
     {
 
         if (APP_ENV === 'development') {
+            $className = get_class($this);
 
-            try {
-                throw new Core_Model_Entity_Exception();
-            } catch (Core_Model_Entity_Exception $exc) {
-                $trace = $exc->getTrace();
-                if (!isset($trace[1]) || !isset($trace[1]['class']) || $trace[1]['class'] !== 'Core_Model') {
-                    throw new Core_Model_Entity_Exception("Entity must be created by Model::createEntity() method");
+            $modelClass = str_replace('_Entity', '', $className);
+
+            if (class_exists($modelClass)) {
+                try {
+                    throw new Core_Model_Entity_Exception();
+                } catch (Core_Model_Entity_Exception $exc) {
+                    $trace = $exc->getTrace();
+                    if (!isset($trace[1]) || !isset($trace[1]['class']) || $trace[1]['class'] !== 'Core_Model') {
+                        throw new Core_Model_Entity_Exception("Entity must be created by Model::createEntity() method");
+                    }
                 }
             }
 
@@ -43,7 +48,6 @@ abstract class Core_Model_Entity
             foreach ($reflection->getDefaultProperties() as $property => $value) {
                 $publicName = trim($property, '_');
                 if ($publicName !== 'id' && !preg_match("~\@property\s+[a-zA-Z_\[\]]+\s+$publicName~m", $comment)) {
-                    $className = get_class($this);
                     throw new Core_Model_Entity_Exception("Class comment '@property propertyType $publicName' is missing in $className");
                 }
             }
@@ -66,6 +70,7 @@ abstract class Core_Model_Entity
 
     public function __get($name)
     {
+
         $property = "_$name";
 
         if (!property_exists($this, $property)) {
@@ -132,7 +137,8 @@ abstract class Core_Model_Entity
             if (preg_match('~^_{1}[a-z0-9]+$~i', $property)) {
                 $publicProperty = trim($property, '_');
                 $key = preg_replace('~([A-Z])~e', "'_' . strtolower('\\1')", $publicProperty);
-                $data[$key] = $this->$publicProperty;
+
+                $data[$key] = $this->_toArray($this->$publicProperty);
             }
         }
 
@@ -154,6 +160,26 @@ abstract class Core_Model_Entity
         }
 
         return $this;
+    }
+
+
+    protected function _toArray($property)
+    {
+
+        if (is_array($property)) {
+            $result = array();
+            foreach ($property as $key => $value) {
+                $result[$key] = $this->_toArray($value);
+            }
+
+            return $result;
+        }
+
+        if (is_object($property) && method_exists($property, 'toArray')) {
+            return $property->toArray();
+        }
+
+        return $property;
     }
 
 

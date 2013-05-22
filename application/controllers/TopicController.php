@@ -5,7 +5,7 @@
  *
  * @property Custom_View $view
  */
-class TopicController extends Zend_Controller_Action
+class TopicController extends Custom_Controller_Action
 {
 
 
@@ -36,13 +36,17 @@ class TopicController extends Zend_Controller_Action
         $this->view->headTitle($topicEntity->title);
     }
 
+
     public function addAction()
     {
+
         $this->view->headTitle('Add topic');
     }
 
+
     public function editAction()
     {
+
         $this->view->headTitle('Edit topic');
 
         /** @var Model_Topic_Entity $topicEntity */

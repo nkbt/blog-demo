@@ -17,7 +17,9 @@ $userEntity = $this->userEntity;
                     <?php echo $this->escape($userEntity->email) ?>
                 </a>
             </h5>
-            <p>Joined: <?php $date = new Zend_Date($userEntity->timestampAdd); echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?></p>
+
+            <p>Joined: <?php $date = new Zend_Date($userEntity->timestampAdd);
+                echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?></p>
         </div>
 
 

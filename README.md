@@ -36,4 +36,9 @@ TODO
 - [x] NodeJS 0.10 or newer
 - [x] NPM
 - [x] Forever
-- [ ] Running Node app
+- [x] Node app
+- [x] Sample subscribers
+- [x] PHP API controller to handle node callbacks
+- [ ] Counters recalculation
+- [ ] Counters display
+- [ ] Forms to add, edit, delete and restore entities

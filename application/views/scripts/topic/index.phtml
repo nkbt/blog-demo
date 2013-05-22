@@ -25,12 +25,14 @@ $topicList = $this->topicList;
                 </h4>
                 <h5>
                     <em>
-                        <?php $date = new Zend_Date($topicEntity->timestampAdd); echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?>
+                        <?php $date = new Zend_Date($topicEntity->timestampAdd);
+                        echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?>
                         by <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'user', 'action' => 'item', 'id' => $topicEntity->user->id), 'default', true) ?>">
                             <?php echo $this->escape($topicEntity->user->name) ?>
                         </a>
                     </em>
                 </h5>
+
                 <p><?php echo nl2br(mb_strimwidth($topicEntity->text, 0, 200, "... <a href=\"$topicUrl\">Read more</a>")) ?></p>
             </div>
         </div>

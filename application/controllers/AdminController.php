@@ -1,11 +1,6 @@
 <?php
 
-/**
- * Class AdminController
- *
- * @property Custom_View $view
- */
-class AdminController extends Zend_Controller_Action
+class AdminController extends Custom_Controller_Action
 {
 
 

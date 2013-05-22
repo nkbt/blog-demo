@@ -5,7 +5,7 @@
  *
  * @property Custom_View $view
  */
-class CommentController extends Zend_Controller_Action
+class CommentController extends Custom_Controller_Action
 {
 
 

@@ -5,7 +5,7 @@
  *
  * @property Custom_View $view
  */
-class IndexController extends Zend_Controller_Action
+class IndexController extends Custom_Controller_Action
 {
 
 

@@ -6,7 +6,7 @@ $config = array(
 	'LIB_ROOT' => '/../library',
 	'ZEND_ROOT' => '/../library',
 	'CACHE_ENABLED' => 0,
-	'DEBUG' => 0,
+	'DEBUG' => 1,
 );
 
 $appEnv = getenv('APP_ENV');
@@ -86,7 +86,6 @@ if (Core_Cookie::get('DEBUG') == 1) {
 	$env = getenv('DEBUG');
 }
 define('DEBUG', $env !== false ? $env : $config['DEBUG']);
-
 $includePath = get_include_path();
 if (strpos(PATH_SEPARATOR . $includePath . PATH_SEPARATOR, PATH_SEPARATOR . ZEND_ROOT . PATH_SEPARATOR) === false) {
 	set_include_path(ZEND_ROOT . PATH_SEPARATOR . $includePath);

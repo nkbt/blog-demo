@@ -5,7 +5,7 @@
  *
  * @property Custom_View $view
  */
-class UserController extends Zend_Controller_Action
+class UserController extends Custom_Controller_Action
 {
 
 
@@ -19,6 +19,8 @@ class UserController extends Zend_Controller_Action
             Core_Model_Factory::get('User')->fetchAll(array(), array('timestampAdd' => 'desc'))
         );
     }
+
+
     public function itemAction()
     {
 
@@ -28,13 +30,17 @@ class UserController extends Zend_Controller_Action
         $this->view->headTitle($userEntity->name);
     }
 
+
     public function addAction()
     {
+
         $this->view->headTitle('Add user');
     }
 
+
     public function editAction()
     {
+
         $this->view->headTitle('Edit user');
 
         /** @var Model_User_Entity $userEntity */

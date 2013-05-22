@@ -10,6 +10,10 @@ class Core_Model
     /**
      * @var string
      */
+    protected $_name;
+    /**
+     * @var string
+     */
     protected $_tableName;
     /**
      * @var array
@@ -33,8 +37,16 @@ class Core_Model
         }
 
         $this->_table = new Core_Model_Table($this->_tableName);
+        $this->_name = str_replace('Model_', '', get_class($this));
 
         $this->_init();
+    }
+
+
+    final public function getName()
+    {
+
+        return $this->_name;
     }
 
 
@@ -76,6 +88,7 @@ class Core_Model
                 $where[] = $this->_table->getAdapter()->quoteInto("`$this->_tableName`.`$key` = ?", $data[$key]);
             }
         }
+        $isUpdate = count($where) === count($primary);
 
         if (!empty($allowedFields)) {
             $data = array_intersect_key($data, array_flip($allowedFields));
@@ -85,17 +98,20 @@ class Core_Model
 
         $this->_beforeSave($entity, $data);
 
-        if (array_key_exists('updated_on', $data)) {
-            $data['updated_on'] = new Zend_Db_Expr('NOW()');
+        if (array_key_exists('timestamp_edit', $data)) {
+            $data['timestamp_edit'] = new Zend_Db_Expr('NOW()');
         }
 
-        if (count($where) == count($primary)) {
-            unset($data['created_on']);
+        if ($isUpdate) {
+            unset($data['timestamp_add']);
+
+            $entityOld = $this->fetchRow(array_intersect_key($data, array_flip($primary)));
+
             $this->_table->update($data, $where);
             $id = $entity->id;
         } else {
-            if (array_key_exists('created_on', $data)) {
-                $data['created_on'] = new Zend_Db_Expr('NOW()');
+            if (array_key_exists('timestamp_add', $data)) {
+                $data['timestamp_add'] = new Zend_Db_Expr('NOW()');
             }
             $id = $this->_table->insert($data);
         }
@@ -105,7 +121,38 @@ class Core_Model
         $entity->fromArray($data);
         $entity->id = $id;
 
+        if ($isUpdate && isset($entityOld)) {
+            if (!isset($allowedFields[0]) || $allowedFields[0] !== 'isDeleted') {
+                $this->publish('onUpdate', array('id' => $entity->id, 'entity' => $entity, 'entityOld' => $entityOld));
+            } elseif ($entityOld->isDeleted && !$entity->isDeleted) {
+                $this->publish('onRestore', array('id' => $entity->id, 'entity' => $entity));
+            } elseif (!$entityOld->isDeleted && $entity->isDeleted) {
+                $this->publish('onDelete', array('id' => $entity->id, 'entity' => $entity));
+            }
+        } else {
+            $this->publish('onInsert', array('id' => $entity->id, 'entity' => $entity));
+        }
+
         return $entity;
+    }
+
+
+    final public function publish($eventName, $data)
+    {
+
+        /** @var Redis $redis */
+        $client = Zend_Registry::get('Redis');
+        $eventEntity = new Model_Api_Event_Entity();
+        $eventEntity->name = $eventName;
+        $eventEntity->node = $data;
+        $eventEntity->php = base64_encode(serialize($data));
+
+        $keyName = $eventName . ":" . $this->getName();
+
+        $client->lPush('Log:PHPEventPublish', Zend_Json::encode(array('name' => $keyName, 'data' => $data)));
+        $client->publish($keyName, Zend_Json::encode($eventEntity));
+
+        return true;
     }
 
 
@@ -120,6 +167,7 @@ class Core_Model
         /** @var Zend_Db_Table_Row_Abstract $row */
 
         try {
+            /** @var Zend_Db_Table_Row $row */
             $row = call_user_func_array(array($this->_table, 'find'), func_get_args());
             $row = $row->current();
         } catch (Exception $exc) {
@@ -225,7 +273,8 @@ class Core_Model
         $this->_applyFilter($select, $filter)
             ->_applySort($select, $sort)
             ->_applyLimit($select, $limit, $offset);
-//qDebug::varDumpAndDie($select->assemble(),'$select->assemble()');
+
+
         /** @var Zend_Db_Table_Rowset $rowset */
         try {
             $rowset = $this->_table->fetchAll($select);
@@ -406,7 +455,7 @@ class Core_Model
                     list($from, $to) = $value;
                     $select->where(
                         $select->getAdapter()->quoteInto("`$this->_tableName`.`$column` BETWEEN ?", $from)
-                            . " AND ?", $to
+                        . " AND ?", $to
                     );
                 }
                 break;
