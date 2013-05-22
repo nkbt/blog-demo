@@ -24,6 +24,12 @@ class TopicController extends Zend_Controller_Action
     public function itemAction()
     {
 
+
+        $y = 123;
+        $x1 = 5;
+        $z = $this->getRequest();
+
+        echo $x;
         /** @var Model_Topic_Entity $topicEntity */
         $topicEntity = Core_Model_Factory::get('Topic')->find($this->getParam('id'));
         $this->view->assign('topicEntity', $topicEntity);
