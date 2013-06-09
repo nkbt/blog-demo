@@ -37,7 +37,7 @@ class Core_Model
         }
 
         $this->_table = new Core_Model_Table($this->_tableName);
-        $this->_name = str_replace('Model_', '', get_class($this));
+        $this->_name  = str_replace('Model_', '', get_class($this));
 
         $this->_init();
     }
@@ -81,7 +81,7 @@ class Core_Model
 
         $data = $entity->toArray();
 
-        $where = array();
+        $where   = array();
         $primary = $this->_table->info(Zend_Db_Table::PRIMARY);
         foreach ($primary as $key) {
             if (array_key_exists($key, $data) && !is_null($data[$key])) {
@@ -113,6 +113,9 @@ class Core_Model
             if (array_key_exists('timestamp_add', $data)) {
                 $data['timestamp_add'] = new Zend_Db_Expr('NOW()');
             }
+            if (array_key_exists('is_deleted', $data)) {
+                $data['is_deleted'] = 0;
+            }
             $id = $this->_table->insert($data);
         }
 
@@ -141,11 +144,11 @@ class Core_Model
     {
 
         /** @var Redis $redis */
-        $client = Zend_Registry::get('Redis');
-        $eventEntity = new Model_Api_Event_Entity();
+        $client            = Zend_Registry::get('Redis');
+        $eventEntity       = new Model_Api_Event_Entity();
         $eventEntity->name = $eventName;
         $eventEntity->node = $data;
-        $eventEntity->php = base64_encode(serialize($data));
+        $eventEntity->php  = base64_encode(serialize($data));
 
         $keyName = $eventName . ":" . $this->getName();
 
@@ -254,7 +257,16 @@ class Core_Model
         return $data;
     }
 
+	/**
+	 * @param string $column
+	 *
+	 * @return array
+	 */
+	public function getEnumValues($column) {
 
+		return $this->_table->getEnumValues($column);
+	}
+    
     /**
      * @param array $filter
      * @param array $sort
@@ -337,6 +349,13 @@ class Core_Model
     }
 
 
+    public function getSelectData($filter)
+    {
+
+        return $this->fetchPairs($this->_table->getPrimaryKey(), 'name', $filter, array('name' => 'asc'));
+    }
+
+
     protected function _init()
     {
 
@@ -389,7 +408,7 @@ class Core_Model
         }
 
         foreach ($filter as $key => $value) {
-            $name = $this->_toCamelCase($key);
+            $name     = $this->_toCamelCase($key);
             $callback = "_applyFilter" . ucfirst($name);
             if (method_exists($this, $callback)) {
                 $this->$callback($select, $value);
@@ -490,7 +509,7 @@ class Core_Model
     {
 
         foreach ($sort as $key => $value) {
-            $name = ucfirst($this->_toCamelCase($key));
+            $name     = ucfirst($this->_toCamelCase($key));
             $callback = "_applySort$name";
             if (method_exists($this, $callback)) {
                 $this->$callback($select, $value);

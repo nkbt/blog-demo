@@ -24,12 +24,6 @@ class TopicController extends Custom_Controller_Action
     public function itemAction()
     {
 
-
-        $y = 123;
-        $x1 = 5;
-        $z = $this->getRequest();
-
-        echo $x;
         /** @var Model_Topic_Entity $topicEntity */
         $topicEntity = Core_Model_Factory::get('Topic')->find($this->getParam('id'));
         $this->view->assign('topicEntity', $topicEntity);
@@ -40,19 +34,84 @@ class TopicController extends Custom_Controller_Action
     public function addAction()
     {
 
+        $form = new Model_Topic_Form_Add();
+
+        if ($this->getRequest()->isPost()) {
+            if ($form->isValid($this->getAllParams())) {
+                $model  = Core_Model_Factory::get('Topic');
+                $entity = $model->createEntity($form->getValues());
+                $model->save($entity);
+                $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
+            }
+        }
+
+        $this->view->assign('form', $form);
         $this->view->headTitle('Add topic');
+    }
+
+
+    public function deleteAction()
+    {
+
+        if ($this->getRequest()->isPost()) {
+            $id    = (int)$this->getParam('id');
+            $model = Core_Model_Factory::get('Topic');
+            /** @var Model_Topic_Entity $entity */
+            $entity            = $model->find($id);
+            $entity->isDeleted = true;
+            $model->save($entity);
+        }
+
+        $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
+    }
+
+
+    public function restoreAction()
+    {
+
+        if ($this->getRequest()->isPost()) {
+            $id    = (int)$this->getParam('id');
+            $model = Core_Model_Factory::get('Topic');
+            /** @var Model_Topic_Entity $entity */
+            $entity            = $model->find($id);
+            $entity->isDeleted = false;
+            $model->save($entity);
+        }
+
+        $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
     }
 
 
     public function editAction()
     {
 
-        $this->view->headTitle('Edit topic');
+        $form = new Model_Topic_Form_Edit();
 
-        /** @var Model_Topic_Entity $topicEntity */
-        $topicEntity = Core_Model_Factory::get('Topic')->find($this->getParam('id'));
-        $this->view->assign('topicEntity', $topicEntity);
-        $this->view->headTitle($topicEntity->title);
+        if ($this->getRequest()->isPost()) {
+            if ($form->isValid($this->getAllParams())) {
+                $model  = Core_Model_Factory::get('Topic');
+                $values = $form->getValues();
+                $entity = $model->createEntity($values);
+                $model->save($entity, array_keys($values));
+                $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
+            }
+            
+        } else {
+            
+            /** @var Model_Topic_Entity $topicEntity */
+            $topicEntity = Core_Model_Factory::get('Topic')->find($this->getParam('id'));
+            $form->setDefaults($topicEntity->toArray());
+
+            $this->view->assign('topicEntity', $topicEntity);
+            $this->view->headTitle('Edit topic');
+            $this->view->headTitle($topicEntity->title);
+        }                
+        
+        
+        $values = $form->getValues();
+
+        $this->view->assign('form', $form);
+
     }
 
 }

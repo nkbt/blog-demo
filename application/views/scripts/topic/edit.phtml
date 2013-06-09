@@ -1,20 +1,11 @@
 <?php
 /** @var Custom_View $this */
 
-/** @var Model_Topic_Entity $topicEntity */
-$topicEntity = $this->topicEntity;
+/** @var Model_Topic_Form $form */
+$form = $this->form;
 ?>
 
 
-
-<div class="topicList">
-    <div class="media">
-        <span class="pull-left">
-            <img class="media-object" data-src="holder.js/64x64">
-        </span>
-
-        <div class="media-body">
-            <p><?php echo nl2br($topicEntity->text) ?></p>
-        </div>
-    </div>
+<div class="form">
+    <?php echo $form ?>
 </div>
