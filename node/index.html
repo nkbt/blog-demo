@@ -5,13 +5,120 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io.connect('http://localhost');
-        socket.on('news', function (data) {
-            console.log(data);
-            socket.emit('my other event', { my: 'data' });
+        socket.on('event log', function (data) {
+            var $log = document.querySelector('.log');
+            var $item = $log.querySelector('.log-item[data-ident="' + data.key + '"]');
+            if (!$item) {
+                $item = document.querySelector('.log-item.template').cloneNode(true);
+                $item.setAttribute('data-ident', data.key);
+                $item.querySelector('.log-name').innerHTML = data.key;
+
+                $item.classList.remove('template');
+                $log.appendChild($item);
+            }
+
+            var $records = $item.querySelector('.log-records');
+
+            data.log.forEach(function (json, index) {
+                var log = JSON.parse(json),
+                        key,
+                        $record = $records.querySelector('.log-record[data-ident="' + index + '"]'),
+                        $line;
+
+                // Do not update existing records
+                if ($record) {
+                    return;
+                }
+
+                $record = document.querySelector('.log-record.template').cloneNode(true);
+                $record.setAttribute('data-ident', index);
+                $record.classList.remove('template');
+                $records.appendChild($record);
+
+                for (key in log) {
+                    if (log.hasOwnProperty(key)) {
+
+                        $line = $record.querySelector('[data-key="' + key + '"]');
+                        if (!$line) {
+                            $line = document.querySelector('.log-line.template').cloneNode(true);
+                            $line.classList.remove('template');
+                            $line.setAttribute('data-key', key);
+                            $record.appendChild($line);
+                        }
+
+                        $line.querySelector('.key').innerHTML = key;
+                        $line.querySelector('.value').innerHTML = ((typeof log[key] === "string")
+                                ? log[key] : JSON.stringify(log[key], undefined, 2));
+                    }
+                }
+            });
         });
+        
+        function toggle(el) {
+            el.parentNode.parentNode.classList.toggle('visible');
+        }
     </script>
+
+    <style type="text/css">
+        .template { display: none; }
+        .log { font-family: calibri, sans-serif; white-space: nowrap;}
+        .log .log-item { display: inline-block; width: 25%; vertical-align: top; }
+        .log .log-item .log-name { font-size: 12px; }
+        .log .log-item .log-records { padding: 5px; margin: 5px; border: 1px solid rgba(0, 0, 0, 0.1) }
+        .log .log-record:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+        .log .log-record { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 0, 0, 0.1); }
+        .log .log-record .key { font-size: 14px; margin: 3px 0 5px 0;}
+        .log .log-record .value { padding: 3px; font-size: 10px; font-family: consolas, serif, monospace; white-space: pre; overflow: auto; }
+        
+        .log .log-record:not(.visible) .log-line:not([data-key="message"]) {display: none;}
+        .log .log-record.visible {background: rgba(0, 0, 0, 0.02);}
+        .log .log-record.visible .log-line {display: block;}
+        .log .log-record [data-key="message"] .key { display: none; }
+        .log .log-record [data-key="message"] .value { padding: 0; font-size: 14px; font-weight: bold; font-family: calibri, sans-serif; white-space: normal;}
+    </style>
+
 </head>
 <body>
+
+
+<div class="log">
+</div>
+
+
+<div class="log-item template">
+    <h3 class="log-name"></h3>
+
+    <div class="log-records">
+    </div>
+</div>
+
+<div class="log-record template">
+    <div class="log-line" data-key="message">
+        <h4 class="key"></h4>
+
+        <div class="value"></div>
+        <a class="expand" href="#" onclick="toggle(this); return false;">toggle data</a>
+    </div>
+    
+    <div class="log-line" data-key="date">
+        <h4 class="key"></h4>
+
+        <div class="value"></div>
+    </div>
+
+    <div class="log-line" data-key="data">
+        <h4 class="key"></h4>
+
+        <div class="value"></div>
+    </div>
+</div>
+
+<div class="log-line template">
+    <h4 class="key"></h4>
+
+    <div class="value"></div>
+</div>
+
 
 </body>
 </html>

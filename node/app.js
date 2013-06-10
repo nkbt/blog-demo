@@ -36,7 +36,7 @@ pubsubClient.on("message", function onMessage(channel, message) {
     } catch (exc) {
         helpers.logEvent(
             exc,
-            {channel: channel, message: message}, 
+            {channel: channel, message: message},
             "PubSub message JSON decoding failed"
         );
         return;
@@ -53,13 +53,13 @@ var executePhpCallback = function (target, channel, eventData) {
     options = {
         hostname: '127.0.0.1',
         port: 80,
-        path: '/api/event?' 
+        path: '/api/event?'
             + querystring.stringify({
-                event: channel.split(':')[0],
-                target: target,
-                source: channel.split(':')[1],
-                ident: eventData.ident
-            }),
+            event: channel.split(':')[0],
+            target: target,
+            source: channel.split(':')[1],
+            ident: eventData.ident
+        }),
         method: 'POST',
         timeout: 10000,
         headers: {
@@ -67,7 +67,7 @@ var executePhpCallback = function (target, channel, eventData) {
             'Content-Length': postData.length
         }
     };
-    
+
     helpers.logEvent(null, options, 'Node to PHP call', eventData);
 
     request = http.request(options, function onHttpRequest(res) {
@@ -81,17 +81,17 @@ var executePhpCallback = function (target, channel, eventData) {
                 var response = JSON.parse(responseText.trim());
                 if (res.statusCode !== 200 || !response.ok) {
                     helpers.logEvent(
-                        new Error("PHP side application error"), 
-                        {options: options, response: response}, 
-                        'Node to PHP call request', 
+                        new Error("PHP side application error"),
+                        {options: options, response: response},
+                        'Node to PHP call request',
                         eventData
                     );
                 }
             } catch (exc) {
                 helpers.logEvent(
-                    new Error("Response JSON decoding failed"), 
-                    {options: options, responseText: responseText}, 
-                    'Node to PHP call request', 
+                    new Error("Response JSON decoding failed"),
+                    {options: options, responseText: responseText},
+                    'Node to PHP call request',
                     eventData
                 );
             }
@@ -100,9 +100,9 @@ var executePhpCallback = function (target, channel, eventData) {
 
     request.on('error', function onError(error) {
         helpers.logEvent(
-            error, 
-            {options: options}, 
-            'Node to PHP call request', 
+            error,
+            {options: options},
+            'Node to PHP call request',
             eventData
         );
     });
@@ -144,14 +144,74 @@ var server = http.createServer(function handler(req, res) {
 var io = require('socket.io')
     .listen(server);
 var fs = require('fs');
+var async = require('async');
 
 server.listen(3000);
 
-io.sockets.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-        console.log(data);
+var checkRedis = function (socket, eventsCount) {
+
+    var date = new Date(),
+        day = date.getDate() + "",
+        month = (date.getMonth() + 1) + "",
+        year = date.getFullYear() + "",
+        id = 'Event:' + year + '-' 
+            + (month.length == 1 ? "0" + month : month) + "-"
+            + (day.length == 1 ? "0" + day : day) + ":*";
+    
+    async.waterfall([
+
+        client.keys.bind(client, id),
+
+        function (keys, callback) {
+            async.map(
+                keys,
+                client.llen.bind(client),
+                function (error, data) {
+
+                    var newEventsCount = data.reduce(function (count, accum) {
+                        return accum + count
+                    }, 0);
+
+
+                    if (newEventsCount <= eventsCount) {
+                        return callback(new Error('No new items added'));
+                    }
+                    eventsCount = newEventsCount;
+
+                    return callback(error, keys.map(function (key, index) {
+                        return {key: key, length: data[index]}
+                    }));
+
+                }
+            );
+        },
+
+        function (data, callback) {
+
+            async.map(
+                data,
+                function (item, next) {
+                    client.lrange(item.key, 0, item.length, function(error, log) {
+                        next(error, {key: item.key, log: log});
+                    });
+                },
+                callback
+            );
+
+        }
+    ], function (err, result) {
+        if (err === null) {
+            result.forEach(function(item) {
+                socket.emit('event log', item);
+            });
+        }
+        setTimeout(checkRedis.bind(null, socket, eventsCount), 2000);
     });
+
+};
+
+io.sockets.on('connection', function (socket) {
+    checkRedis(socket, 0);
 });
 
 

@@ -13,7 +13,8 @@
 	"dependencies": {
 		"redis": "*",
 		"glob": "*",
-		"socket.io": "*"
+		"socket.io": "*",
+		"async": "*"
 	},
 	"readmeFilename": "README.md"
 

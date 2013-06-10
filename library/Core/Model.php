@@ -161,7 +161,7 @@ class Core_Model
             ? Zend_Registry::get('EventIdent')
             : "Event";
         
-        $date = date('Ymd-His');
+        $date = date('Y-m-d:His');
 
         /** @var Redis $redis */
         $client             = Zend_Registry::get('Redis');

@@ -99,8 +99,7 @@ var Helpers = {
         var date = new Date(), logInfo = {}, id;
 
         logInfo.message = message;
-        logInfo.utc = date.toUTCString();
-        logInfo.local = date.toJSON();
+        logInfo.date = date.toJSON();
 
         if (eventData && eventData.node !== undefined) {
             logInfo.eventData = eventData.node;
