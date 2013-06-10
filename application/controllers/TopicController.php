@@ -38,9 +38,15 @@ class TopicController extends Custom_Controller_Action
 
         if ($this->getRequest()->isPost()) {
             if ($form->isValid($this->getAllParams())) {
-                $model  = Core_Model_Factory::get('Topic');
+                $model = Core_Model_Factory::get('Topic');
+
+                $this->_beginTransaction();
+
                 $entity = $model->createEntity($form->getValues());
                 $model->save($entity);
+
+                $this->_commit();
+
                 $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
             }
         }
@@ -56,10 +62,13 @@ class TopicController extends Custom_Controller_Action
         if ($this->getRequest()->isPost()) {
             $id    = (int)$this->getParam('id');
             $model = Core_Model_Factory::get('Topic');
-            /** @var Model_Topic_Entity $entity */
-            $entity            = $model->find($id);
-            $entity->isDeleted = true;
-            $model->save($entity);
+
+            $this->_beginTransaction();
+
+            $model->delete($model->find($id));
+
+            $this->_commit();
+
         }
 
         $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
@@ -70,12 +79,15 @@ class TopicController extends Custom_Controller_Action
     {
 
         if ($this->getRequest()->isPost()) {
+
             $id    = (int)$this->getParam('id');
             $model = Core_Model_Factory::get('Topic');
-            /** @var Model_Topic_Entity $entity */
-            $entity            = $model->find($id);
-            $entity->isDeleted = false;
-            $model->save($entity);
+
+            $this->_beginTransaction();
+
+            $model->restore($model->find($id));
+
+            $this->_commit();
         }
 
         $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
@@ -91,13 +103,19 @@ class TopicController extends Custom_Controller_Action
             if ($form->isValid($this->getAllParams())) {
                 $model  = Core_Model_Factory::get('Topic');
                 $values = $form->getValues();
+
+                $this->_beginTransaction();
+
                 $entity = $model->createEntity($values);
                 $model->save($entity, array_keys($values));
+
+                $this->_commit();
+
                 $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
             }
-            
+
         } else {
-            
+
             /** @var Model_Topic_Entity $topicEntity */
             $topicEntity = Core_Model_Factory::get('Topic')->find($this->getParam('id'));
             $form->setDefaults($topicEntity->toArray());
@@ -105,9 +123,9 @@ class TopicController extends Custom_Controller_Action
             $this->view->assign('topicEntity', $topicEntity);
             $this->view->headTitle('Edit topic');
             $this->view->headTitle($topicEntity->title);
-        }                
-        
-        
+        }
+
+
         $values = $form->getValues();
 
         $this->view->assign('form', $form);

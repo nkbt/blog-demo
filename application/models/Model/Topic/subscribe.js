@@ -1,93 +1,51 @@
 'use strict';
 
 
+/**
+ * @type {Helpers}
+ */
+var helpers;
+
+
+/**
+ * @param {Object} eventData
+ */
+var commentIncr = function (eventData) {
+    helpers.validateRequired(eventData, ['node.entity.id_topic'], function (error) {
+        if (error === null) {
+            helpers.incr("Counter:Topic:" + eventData.node.entity.id_topic + ":Comment", eventData);
+        }
+    });
+};
+
+
+/**
+ * @param {Object} eventData
+ */
+var commentDecr = function (eventData) {
+    helpers.validateRequired(eventData, ['node.entity.id_topic'], function (error) {
+        if (error === null) {
+            helpers.decr("Counter:Topic:" + eventData.node.entity.id_topic + ":Comment", eventData);
+        }
+    });
+};
+
+
 exports.php = [
-    "onDelete:User"
+    "onDelete:User",
+    "onRestore:User"
 ];
 
-/**
- * @param {EventEmitter} eventEmitter
- * @param {RedisClient} redisClient
- * @param id
- */
-var incr = function (eventEmitter, redisClient, id) {
-    return redisClient.incr(id, function (error, data) {
-        if (error !== null) {
-            eventEmitter.emit('error', new Error('redisClient.incr returned error: ' + error.message), {'id': id, 'data': data, 'error': error});
-        } else {
-            eventEmitter.emit('counter', id, 'incr', data);
-        }
-    });
-};
-
 
 /**
- * @param {EventEmitter} eventEmitter
- * @param {RedisClient} redisClient
- * @param id
+ * @param {Helpers} initHelpers
  */
-var decr = function (eventEmitter, redisClient, id) {
-    return redisClient.decr(id, function (error, data) {
-        if (error !== null) {
-            eventEmitter.emit('error', new Error('redisClient.decr returned error: ' + error.message), {'id': id, 'data': data, 'error': error});
-        } else {
-            eventEmitter.emit('counter', id, 'decr', data);
-        }
-    });
-};
+exports.subscribe = function (initHelpers) {
+    helpers = initHelpers;
 
-/**
- * @param {EventEmitter} eventEmitter
- * @param data
- */
-var commentIsValid = function (eventEmitter, data) {
-    if (data.entity === undefined) {
-        eventEmitter.emit('error', new Error('data.entity is not defined'), data);
-        return false;
-    }
-    if (data.entity.idTopic === undefined) {
-        eventEmitter.emit('error', new Error('idTopic is not defined'), data);
-        return false;
-    }
-    return true;
-};
-
-
-/**
- * @param {EventEmitter} eventEmitter
- * @param {RedisClient} redisClient
- * @param data
- */
-var commentIncr = function (eventEmitter, redisClient, data) {
-    if (!commentIsValid(eventEmitter, data)) {
-        return;
-    }
-
-    incr(eventEmitter, redisClient, "Counter:Topic:" + data.entity.idTopic + ":Comment");
-};
-
-
-/**
- * @param {EventEmitter} eventEmitter
- * @param {RedisClient} redisClient
- * @param data
- */
-var commentDecr = function (eventEmitter, redisClient, data) {
-    if (!commentIsValid(eventEmitter, data)) {
-        return;
-    }
-
-    decr(eventEmitter, redisClient, "Counter:Topic:" + data.entity.idTopic + ":Comment");
-};
-
-
-/**
- * @param {EventEmitter} eventEmitter
- */
-exports.subscribe = function (eventEmitter) {
-
-    eventEmitter.on("onInsert:Comment", commentIncr.bind(null, eventEmitter));
-    eventEmitter.on("onRestore:Comment", commentIncr.bind(null, eventEmitter));
-    eventEmitter.on("onDelete:Comment", commentDecr.bind(null, eventEmitter));
+    helpers.getEventEmitter()
+        .on("onInsert:Comment", commentIncr)
+        .on("onRestore:Comment", commentIncr)
+        .on("onDelete:Comment", commentDecr);
 
 };

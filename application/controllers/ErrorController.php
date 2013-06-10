@@ -79,6 +79,8 @@ class ErrorController extends Custom_Controller_Action
     protected function _error($errorHandler)
     {
 
+        $priority = Zend_Log::ERR;
+        
         /** @var Exception $exc */
         $exc = $errorHandler->exception;
 

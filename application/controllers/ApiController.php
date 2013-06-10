@@ -21,16 +21,25 @@ class ApiController extends Custom_Controller_Action
     public function eventAction()
     {
 
-        Zend_Registry::get('Redis')->lPush('Log:PHPEventController', Zend_Json::encode($this->getAllParams()));
 
-        $event = $this->getParam('event');
+        $event  = $this->getParam('event');
         $target = $this->getParam('target');
         $source = $this->getParam('source');
+        $ident = $this->getParam('ident', 'Error');
+        
+        Zend_Registry::set('EventIdent', $ident);
 
+        $logInfo = array(
+            'message' => 'PHP call received',
+            'date' => date('r'),
+            'params' => $this->getAllParams(),
+        );
+        Zend_Registry::get('Redis')->rPush($ident, Zend_Json::encode($logInfo));
+        
         if (empty($event)) {
             throw new Custom_Exception_404("Event not defined");
         }
-        
+
         if (empty($target)) {
             throw new Custom_Exception_404("Target entity not defined");
         }
@@ -49,7 +58,12 @@ class ApiController extends Custom_Controller_Action
         try {
             set_error_handler(array($this, '_errorHandler'));
             $data = unserialize(base64_decode($this->getParam('data')));
-            Zend_Registry::get('Redis')->lPush('Log:PHPEventControllerData', Zend_Json::encode($data));
+            $logInfo = array(
+                'message' => 'PHP call decoded data',
+                'date' => date('r'),
+                'data' => print_r($data, true),
+            );
+            Zend_Registry::get('Redis')->rPush($ident, Zend_Json::encode($logInfo));
             restore_error_handler();
 
             call_user_func(array($model, $method), $data);
