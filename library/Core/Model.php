@@ -69,63 +69,77 @@ class Core_Model
     }
 
 
+    final public function delete(Core_Model_Entity $entity)
+    {
+
+        if (property_exists($entity, '_isDeleted')) {
+            $entity->isDeleted = true;
+            $this->save($entity, array('is_deleted'));
+        } else {
+            $this->_table->delete($this->_buildWhereByPrimary($entity));
+        }
+    }
+
+
+    final public function restore(Core_Model_Entity $entity)
+    {
+
+        if (property_exists($entity, '_isDeleted')) {
+            $entity->isDeleted = false;
+            $this->save($entity, array('is_deleted'));
+        }
+    }
+
+
     /**
      * @param Core_Model_Entity $entity
      *
-     * @param array             $allowedFields Array of DB columns to update
+     * @param array             $allowedColumns Array of DB columns to update
      *
      * @return Core_Model_Entity
      */
-    final public function save(Core_Model_Entity $entity, array $allowedFields = array())
+    final public function save(Core_Model_Entity $entity, array $allowedColumns = array())
     {
 
         $data = $entity->toArray();
 
-        $where   = array();
-        $primary = $this->_table->info(Zend_Db_Table::PRIMARY);
-        foreach ($primary as $key) {
-            if (array_key_exists($key, $data) && !is_null($data[$key])) {
-                $where[] = $this->_table->getAdapter()->quoteInto("`$this->_tableName`.`$key` = ?", $data[$key]);
-            }
-        }
-        $isUpdate = count($where) === count($primary);
-
-        if (!empty($allowedFields)) {
-            $data = array_intersect_key($data, array_flip($allowedFields));
-        }
-
-        $data = $this->_dataAdapter($entity, $data);
-
         $this->_beforeSave($entity, $data);
 
-        if (array_key_exists('timestamp_edit', $data)) {
-            $data['timestamp_edit'] = new Zend_Db_Expr('NOW()');
-        }
+        $primary  = $this->_table->info(Zend_Db_Table::PRIMARY);
+        $where = $this->_buildWhereByPrimary($entity);
+        $isUpdate = count($where) === count($primary);
+
+        $allowedData = empty($allowedColumns)
+            ? $data
+            : array_intersect_key($data, array_flip($allowedColumns));
+        
+        $allowedData = $this->_dataAdapter($entity, $allowedData);
 
         if ($isUpdate) {
-            unset($data['timestamp_add']);
-
+            unset($allowedData['timestamp_add']);
+            if (property_exists($entity, '_timestampEdit')) {
+                $allowedData['timestamp_edit'] = new Zend_Db_Expr('NOW()');
+            }
             $entityOld = $this->fetchRow(array_intersect_key($data, array_flip($primary)));
-
-            $this->_table->update($data, $where);
+            $this->_table->update($allowedData, $where);
             $id = $entity->id;
         } else {
-            if (array_key_exists('timestamp_add', $data)) {
-                $data['timestamp_add'] = new Zend_Db_Expr('NOW()');
+            if (property_exists($entity, '_timestampAdd')) {
+                $allowedData['timestamp_add'] = new Zend_Db_Expr('NOW()');
             }
-            if (array_key_exists('is_deleted', $data)) {
-                $data['is_deleted'] = 0;
+            if (property_exists($entity, '_isDeleted')) {
+                $allowedData['is_deleted'] = 0;
             }
-            $id = $this->_table->insert($data);
+
+            $id = $this->_table->insert($allowedData);
         }
 
         $this->_afterSave($entity, $id);
 
         $entity->fromArray($data);
         $entity->id = $id;
-
         if ($isUpdate && isset($entityOld)) {
-            if (!isset($allowedFields[0]) || $allowedFields[0] !== 'isDeleted') {
+            if (!isset($allowedColumns[0]) || $allowedColumns[0] !== 'is_deleted') {
                 $this->publish('onUpdate', array('id' => $entity->id, 'entity' => $entity, 'entityOld' => $entityOld));
             } elseif ($entityOld->isDeleted && !$entity->isDeleted) {
                 $this->publish('onRestore', array('id' => $entity->id, 'entity' => $entity));
@@ -143,16 +157,30 @@ class Core_Model
     final public function publish($eventName, $data)
     {
 
+        $ident = Zend_Registry::isRegistered('EventIdent')
+            ? Zend_Registry::get('EventIdent')
+            : "Event";
+        
+        $date = date('Ymd-His');
+
         /** @var Redis $redis */
-        $client            = Zend_Registry::get('Redis');
-        $eventEntity       = new Model_Api_Event_Entity();
-        $eventEntity->name = $eventName;
-        $eventEntity->node = $data;
-        $eventEntity->php  = base64_encode(serialize($data));
+        $client             = Zend_Registry::get('Redis');
+        $eventEntity        = new Model_Api_Event_Entity();
+        $eventEntity->ident = "$ident:$date - $this->_name - $eventName";
+        $eventEntity->name  = $eventName;
+        $eventEntity->node  = $data;
+        $eventEntity->php   = base64_encode(serialize($data));
 
         $keyName = $eventName . ":" . $this->getName();
 
-        $client->lPush('Log:PHPEventPublish', Zend_Json::encode(array('name' => $keyName, 'data' => $data)));
+        $logInfo = array(
+            'message' => 'PHP event published',
+            'date' => date('r'),
+            'name' => $keyName,
+            'data' => print_r($data, true),
+        );
+        Zend_Registry::get('Redis')->rPush($eventEntity->ident, Zend_Json::encode($logInfo));
+
         $client->publish($keyName, Zend_Json::encode($eventEntity));
 
         return true;
@@ -176,7 +204,6 @@ class Core_Model
         } catch (Exception $exc) {
             throw new Core_Model_Exception_Select($exc->getMessage() . ' Data: ' . var_export(func_get_args()));
         }
-
         if (!$row) {
             throw new Core_Model_Exception_Empty();
         }
@@ -257,16 +284,19 @@ class Core_Model
         return $data;
     }
 
-	/**
-	 * @param string $column
-	 *
-	 * @return array
-	 */
-	public function getEnumValues($column) {
 
-		return $this->_table->getEnumValues($column);
-	}
-    
+    /**
+     * @param string $column
+     *
+     * @return array
+     */
+    public function getEnumValues($column)
+    {
+
+        return $this->_table->getEnumValues($column);
+    }
+
+
     /**
      * @param array $filter
      * @param array $sort
@@ -353,6 +383,22 @@ class Core_Model
     {
 
         return $this->fetchPairs($this->_table->getPrimaryKey(), 'name', $filter, array('name' => 'asc'));
+    }
+
+
+    protected function _buildWhereByPrimary(Core_Model_Entity $entity)
+    {
+
+        $data    = $entity->toArray();
+        $where   = array();
+        $primary = $this->_table->info(Zend_Db_Table::PRIMARY);
+        foreach ($primary as $key) {
+            if (array_key_exists($key, $data) && !is_null($data[$key])) {
+                $where[] = $this->_table->getAdapter()->quoteInto("`$this->_tableName`.`$key` = ?", $data[$key]);
+            }
+        }
+
+        return $where;
     }
 
 

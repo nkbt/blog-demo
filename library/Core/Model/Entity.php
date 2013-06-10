@@ -11,12 +11,6 @@ abstract class Core_Model_Entity
 
     protected $__id;
     /**
-     * We don't want to accidentally store in cache related entities, that could be changed
-     *
-     * @var array
-     */
-    private $__clearBeforeCache = array();
-    /**
      * Even if property is NULL, we don't want to calculate it more then once
      *
      * @var array
@@ -44,7 +38,7 @@ abstract class Core_Model_Entity
             }
 
             $reflection = new ReflectionClass($this);
-            $comment = $reflection->getDocComment();
+            $comment    = $reflection->getDocComment();
             foreach ($reflection->getDefaultProperties() as $property => $value) {
                 $publicName = trim($property, '_');
                 if ($publicName !== 'id' && !preg_match("~\@property\s+[a-zA-Z_\[\]]+\s+$publicName~m", $comment)) {
@@ -58,13 +52,16 @@ abstract class Core_Model_Entity
     public function __sleep()
     {
 
-        $allVars = get_object_vars($this);
-        foreach ($this->__clearBeforeCache as $field => $value) {
-            unset($allVars[$field]);
+        $fields  = get_object_vars($this);
+        $allowed = array();
+        foreach ($fields as $field => $value) {
+            // allow to serialize only protected properties and not private
+            if (substr($field, 0, 2) !== '__') {
+                $allowed[] = $field;
+            }
         }
-        $serializable = array_keys($allVars);
 
-        return $serializable;
+        return $allowed;
     }
 
 
@@ -86,7 +83,7 @@ abstract class Core_Model_Entity
 
         $getter = '_get' . ucfirst($name);
         if (method_exists($this, $getter)) {
-            $this->$property = $this->$getter();
+            $this->$property             = $this->$getter();
             $this->__setCache[$property] = true;
         }
 
@@ -132,11 +129,11 @@ abstract class Core_Model_Entity
     {
 
         $allVars = get_object_vars($this);
-        $data = array();
+        $data    = array();
         foreach ($allVars as $property => $value) {
             if (preg_match('~^_{1}[a-z0-9]+$~i', $property)) {
                 $publicProperty = trim($property, '_');
-                $key = preg_replace('~([A-Z])~e', "'_' . strtolower('\\1')", $publicProperty);
+                $key            = preg_replace('~([A-Z])~e', "'_' . strtolower('\\1')", $publicProperty);
 
                 $data[$key] = $this->_toArray($this->$publicProperty);
             }
@@ -155,7 +152,7 @@ abstract class Core_Model_Entity
     {
 
         foreach ($data as $key => $value) {
-            $publicProperty = preg_replace('~_([a-z])~e', "strtoupper('\\1')", $key);
+            $publicProperty        = preg_replace('~_([a-z])~e', "strtoupper('\\1')", $key);
             $this->$publicProperty = $value;
         }
 
@@ -184,20 +181,6 @@ abstract class Core_Model_Entity
 
 
     abstract protected function _getId();
-
-
-    /**
-     * @param string $clearBeforeCache
-     *
-     * @return Core_Model_Entity
-     */
-    protected function _setClearBeforeCache($clearBeforeCache)
-    {
-
-        $this->__clearBeforeCache[$clearBeforeCache] = true;
-
-        return $this;
-    }
 
 
 }

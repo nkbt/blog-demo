@@ -12,7 +12,8 @@
 	},
 	"dependencies": {
 		"redis": "*",
-		"glob": "*"
+		"glob": "*",
+		"socket.io": "*"
 	},
 	"readmeFilename": "README.md"
 

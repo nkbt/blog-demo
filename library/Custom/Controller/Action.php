@@ -30,9 +30,9 @@ class Custom_Controller_Action extends Zend_Controller_Action
         $this->_helper = new Zend_Controller_Action_HelperBroker($this);
 
         /** @var Zend_Controller_Action_Helper_ViewRenderer $viewRenderer */
-        $viewRenderer = $this->getHelper('ViewRenderer');
+        $viewRenderer  = $this->getHelper('ViewRenderer');
         $this->_isAjax = $request->isXmlHttpRequest() || !!$request->getParam('ajax');
-        $this->_msg = $this->getHelper('FlashMessenger');
+        $this->_msg    = $this->getHelper('FlashMessenger');
 
 
         $this->init();
@@ -51,10 +51,10 @@ class Custom_Controller_Action extends Zend_Controller_Action
         if (!$this->isAjax()) {
             return;
         }
-        $response = new Model_Api_Response_Entity();
-        $response->data = $this->view->getVars();
+        $response           = new Model_Api_Response_Entity();
+        $response->data     = $this->view->getVars();
         $response->messages = $this->_msg->getCurrentMessages();
-        $response->ok = $this->getRequest()->getControllerName() !== 'error';
+        $response->ok       = $this->getRequest()->getControllerName() !== 'error';
         $this->_msg->clearCurrentMessages();
 
         $this->getResponse()->setHeader('Content-Type', 'application/json')
@@ -66,6 +66,20 @@ class Custom_Controller_Action extends Zend_Controller_Action
     {
 
         return $this->_isAjax;
+    }
+
+
+    protected function _beginTransaction()
+    {
+
+        Zend_Registry::get('dbAdapter')->beginTransaction();
+    }
+
+
+    protected function _commit()
+    {
+
+        Zend_Registry::get('dbAdapter')->commit();
     }
 
 

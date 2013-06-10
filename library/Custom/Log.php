@@ -79,8 +79,18 @@ class Custom_Log
                 $logMessage .= "REDUCED CONTEXT:\n";
                 $logMessage .= $reducedContext;
             }
-
-            Zend_Registry::get('Redis')->hSet("Log:PHP:" . date("Y-m-d"), $ex->getMessage(), $logMessage);
+            
+            Zend_Registry::get('Redis')->lPush(
+                "PHP Log:" . date("Ymd"),
+                Zend_Json::encode(
+                    array(
+                        'timestamp' => time(),
+                        'message' => $message,
+                        'file' => "$file:$line",
+                        'log' => $logMessage,
+                    )
+                )
+            );
         }
     }
 
@@ -110,17 +120,14 @@ class Custom_Log
                 $line = isset($traceArray[1]['line']) ? $traceArray[1]['line'] : 'unknown';
             }
         }
-        $hashKey = "$messageText - $file:$line";
-
-        $id = "Log:PHP:" . date("Y-m-d");
-        Zend_Registry::get('Redis')->hSet(
-            $id,
-            $hashKey,
+        Zend_Registry::get('Redis')->lPush(
+            "PHP Log:" . date("Ymd"),
             Zend_Json::encode(
                 array(
                     'priority' => self::$_instance->getPriority($priority),
                     'timestamp' => time(),
                     'message' => $messageText,
+                    'file' => "$file:$line",
                     'trace' => $trace,
                     'data' => $data,
                 )
