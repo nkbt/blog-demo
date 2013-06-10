@@ -178,3 +178,8 @@ phpredis:
     - require:
       - pkg: unzip
       - pkg: php5-pkgs
+
+sydney-timezone:
+  cmd:
+    - run
+    - name: ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
