@@ -83,5 +83,17 @@ class Custom_Controller_Action extends Zend_Controller_Action
     }
 
 
+    protected function _getReturnPath($default = null)
+    {
+
+        $return = $this->getParam('return', $default);
+        if (empty($return)) {
+            // current page
+            $return = $this->view->url();
+        }
+        return $return;
+    }
+
+
 }
 

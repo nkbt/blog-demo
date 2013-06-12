@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: Nikita
- * Date: 9/06/13
- * Time: 6:45 PM
- * To change this template use File | Settings | File Templates.
- */
 
 class Model_Topic_Form extends Custom_Form
 {
@@ -16,15 +9,11 @@ class Model_Topic_Form extends Custom_Form
 
         $this->addElement(
             'select', 'id_user', array(
-                'label'      => 'User',
+                'label'      => 'Author',
                 'entity'     => 'User',
                 'required'   => true,
-                'validators' => array(
-                    array('validator' => 'Int'),
-                ),
-                'filters' => array(
-                    array('filter' => 'Int'),
-                ),
+                'validators' => array('Int'),
+                'filters'    => array('Int', 'Null'),
             )
         );
         $this->addElement(

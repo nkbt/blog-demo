@@ -13,7 +13,7 @@ $userList = $this->userList;
     <?php foreach ($userList as $userEntity): ?>
         <?php $userUrl = $this->url(array('module' => $this->currentModule(), 'controller' => $this->currentController(), 'action' => 'item', 'id' => $userEntity->id), 'default', true) ?>
 
-        <div class="media">
+        <div class="media <?php echo $userEntity->isDeleted ? 'deleted' : '' ?>">
             <a class="pull-left" href="<?php echo $userUrl ?>">
                 <img class="media-object" data-src="holder.js/64x64">
             </a>
@@ -32,6 +32,9 @@ $userList = $this->userList;
 
                 <p>Joined: <?php $date = new Zend_Date($userEntity->timestampAdd);
                     echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?></p>
+                
+                <p>Comments: <em><?php echo $this->escape($userEntity->countComment) ?></em></p>
+                <p>Topics: <em><?php echo $this->escape($userEntity->countTopic) ?></em></p>
             </div>
         </div>
 

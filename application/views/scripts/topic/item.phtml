@@ -16,7 +16,9 @@ $topicEntity = $this->topicEntity;
                 <em>
                     <?php $date = new Zend_Date($topicEntity->timestampAdd);
                     echo $date->toString(Zend_Date::DATETIME_MEDIUM) ?>
-                    by <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'user', 'action' => 'item', 'id' => $topicEntity->user->id), 'default', true) ?>">
+                    by <a href="<?php echo $this->url(
+                        array('module' => $this->currentModule(), 'controller' => 'user', 'action' => 'item', 'id' => $topicEntity->user->id), 'default', true
+                    ) ?>">
                         <?php echo $this->escape($topicEntity->user->name) ?>
                     </a>
                 </em>
@@ -30,25 +32,11 @@ $topicEntity = $this->topicEntity;
 </div>
 
 <h3>Comments:</h3>
-
-<section class="well commentList">
-    <?php foreach ($topicEntity->commentList as $commentEntity): ?>
-
-        <div class="media">
-            <span class="pull-left">
-                <img class="media-object" data-src="holder.js/64x64">
-            </span>
-
-            <div class="media-body">
-                <h5 class="media-heading">
-                    User: <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'user', 'action' => 'item', 'id' => $commentEntity->user->id), 'default', true) ?>">
-                        <?php echo $this->escape($commentEntity->user->name) ?>
-                    </a>
-                </h5>
-
-                <p><?php echo $this->escape($commentEntity->text) ?></p>
-            </div>
-        </div>
-
-    <?php endforeach ?>
-</section>
+<div class="well">
+    <?php echo $this->partial(
+        'comment/index.phtml', array(
+            'commentList' => $topicEntity->commentList,
+            'topicEntity' => $topicEntity,
+        )
+    ) ?>
+</div>

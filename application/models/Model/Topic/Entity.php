@@ -9,6 +9,7 @@
  * @property bool                   isDeleted
  * @property Model_User_Entity      user
  * @property Model_Comment_Entity[] commentList
+ * @property int                    countComment
  */
 class Model_Topic_Entity extends Core_Model_Entity
 {
@@ -22,6 +23,7 @@ class Model_Topic_Entity extends Core_Model_Entity
     protected $_isDeleted;
     protected $__user;
     protected $__commentList;
+    protected $__countComment;
 
 
     protected function _getId()
@@ -99,6 +101,24 @@ class Model_Topic_Entity extends Core_Model_Entity
         } catch (Core_Model_Exception_Empty $exc) {
             return array();
         }
+    }
+
+
+    protected function _getCountComment()
+    {
+
+        return Zend_Registry::get('Redis')
+            ->get("Counter:Topic:$this->idTopic:Comment");
+    }
+
+
+    protected function _setCountComment($count)
+    {
+
+        Zend_Registry::get('Redis')
+            ->set("Counter:Topic:$this->idTopic:Comment", (int)$count);
+
+        return (int)$count;
     }
 
 

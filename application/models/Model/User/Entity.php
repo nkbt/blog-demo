@@ -7,6 +7,8 @@
  * @property int                    timestampAdd
  * @property bool                   isDeleted
  * @property Model_Comment_Entity[] commentList
+ * @property int                    countComment
+ * @property int                    countTopic
  */
 class Model_User_Entity extends Core_Model_Entity
 {
@@ -18,6 +20,8 @@ class Model_User_Entity extends Core_Model_Entity
     protected $_timestampAdd;
     protected $_isDeleted;
     protected $__commentList;
+    protected $__countComment;
+    protected $__countTopic;
 
 
     protected function _getId()
@@ -81,5 +85,41 @@ class Model_User_Entity extends Core_Model_Entity
         } catch (Core_Model_Exception_Empty $exc) {
             return array();
         }
+    }
+
+
+    protected function _getCountComment()
+    {
+
+        return Zend_Registry::get('Redis')
+            ->get("Counter:User:$this->idUser:Comment");
+    }
+
+
+    protected function _setCountComment($count)
+    {
+
+        Zend_Registry::get('Redis')
+            ->set("Counter:User:$this->idUser:Comment", (int)$count);
+
+        return (int)$count;
+    }
+
+
+    protected function _getCountTopic()
+    {
+
+        return Zend_Registry::get('Redis')
+            ->get("Counter:User:$this->idUser:Topic");
+    }
+
+
+    protected function _setCountTopic($count)
+    {
+
+        Zend_Registry::get('Redis')
+            ->set("Counter:User:$this->idUser:Topic", (int)$count);
+
+        return (int)$count;
     }
 }

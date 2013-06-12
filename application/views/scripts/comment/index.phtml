@@ -3,26 +3,76 @@
 
 /** @var Model_Comment_Entity[] $commentList */
 $commentList = $this->commentList;
+
+/** @var Model_Topic_Entity $topicEntity */
+$topicEntity = $this->topicEntity;
 ?>
+<p class="lead">
+    <a class="btn btn-primary " href="<?php echo $this->url(
+        array(
+            'controller' => 'comment',
+            'action'     => 'add',
+            'id_topic'   => $topicEntity ? $topicEntity->id : null
+        ), 'default', true
+    ) ?>">Add comment</a>
+</p>
 
 <section class="commentList">
     <?php foreach ($commentList as $commentEntity): ?>
 
-        <div class="media">
+        <div class="media <?php echo $commentEntity->isDeleted ? 'deleted' : '' ?>">
 
             <div class="media-body">
+                <?php $deleteUrl = $this->url(
+                    array(
+                        'controller' => 'comment',
+                        'action'     => $commentEntity->isDeleted ? 'restore' : 'delete',
+                        'id'         => $commentEntity->id
+                    ), 'default', true
+                );
+                ?>
+                <form action="<?php echo $deleteUrl ?>" class="pull-right" method="post">
+                    <?php echo $this->formSubmit(
+                        null,
+                        $commentEntity->isDeleted ? 'restore' : 'delete',
+                        array(
+                            'class' => 'btn btn-small'
+                        )
+                    ) ?>
+                </form>
+
                 <h4 class="media-heading">
-                    Topic: <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'topic', 'action' => 'item', 'id' => $commentEntity->topic->id), 'default', true) ?>">
+                    <?php echo $this->escape($commentEntity->text) ?>
+
+                    <small>
+                        <?php $editUrl = $this->url(
+                            array(
+                                'controller' => 'comment',
+                                'action'     => 'edit',
+                                'id'         => $commentEntity->id
+                            ), 'default', true
+                        ) ?>
+                        <a href="<?php echo $editUrl ?>">Edit</a>
+                    </small>
+
+
+                </h4>
+
+                <p>
+                    Topic: <a
+                        href="<?php echo $this->url(array('controller' => 'topic', 'action' => 'item', 'id' => $commentEntity->topic->id), 'default', true) ?>">
                         <?php echo $this->escape($commentEntity->topic->title) ?>
                     </a>
-                </h4>
-                <h5 class="media-heading">
-                    User: <a href="<?php echo $this->url(array('module' => $this->currentModule(), 'controller' => 'user', 'action' => 'item', 'id' => $commentEntity->user->id), 'default', true) ?>">
+
+                </p>
+
+                <p>
+                    User: <a
+                        href="<?php echo $this->url(array('controller' => 'user', 'action' => 'item', 'id' => $commentEntity->user->id), 'default', true) ?>">
                         <?php echo $this->escape($commentEntity->user->name) ?>
                     </a>
-                </h5>
 
-                <p><?php echo $this->escape($commentEntity->text) ?></p>
+                </p>
             </div>
         </div>
 

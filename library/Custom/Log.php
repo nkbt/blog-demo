@@ -47,9 +47,12 @@ class Custom_Log
     public static function logError($errorCode, $message, $file, $line, $context)
     {
 
-        if (($errorCode != E_ERROR || $errorCode != E_USER_ERROR)
-            && (strstr($file, DIRECTORY_SEPARATOR . 'Zend') !== false
-                || strstr($file, 'Autoloader.php') !== false)
+        if (
+//            ($errorCode != E_ERROR || $errorCode != E_USER_ERROR)
+//            && (strstr($file, DIRECTORY_SEPARATOR . 'Zend') !== false
+//                || 
+        strstr($file, 'Autoloader.php') !== false
+//    )
         ) {
             return;
         }

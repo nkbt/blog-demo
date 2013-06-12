@@ -47,50 +47,16 @@ class TopicController extends Custom_Controller_Action
 
                 $this->_commit();
 
-                $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
+                $this->redirect(
+                    $this->_getReturnPath(
+                        $this->view->url(array('controller' => 'topic'), 'default', true)
+                    )
+                );
             }
         }
 
         $this->view->assign('form', $form);
         $this->view->headTitle('Add topic');
-    }
-
-
-    public function deleteAction()
-    {
-
-        if ($this->getRequest()->isPost()) {
-            $id    = (int)$this->getParam('id');
-            $model = Core_Model_Factory::get('Topic');
-
-            $this->_beginTransaction();
-
-            $model->delete($model->find($id));
-
-            $this->_commit();
-
-        }
-
-        $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
-    }
-
-
-    public function restoreAction()
-    {
-
-        if ($this->getRequest()->isPost()) {
-
-            $id    = (int)$this->getParam('id');
-            $model = Core_Model_Factory::get('Topic');
-
-            $this->_beginTransaction();
-
-            $model->restore($model->find($id));
-
-            $this->_commit();
-        }
-
-        $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
     }
 
 
@@ -111,7 +77,11 @@ class TopicController extends Custom_Controller_Action
 
                 $this->_commit();
 
-                $this->redirect($this->view->url(array('controller' => 'topic'), 'default', true));
+                $this->redirect(
+                    $this->_getReturnPath(
+                        $this->view->url(array('controller' => 'topic'), 'default', true)
+                    )
+                );
             }
 
         } else {
@@ -126,10 +96,54 @@ class TopicController extends Custom_Controller_Action
         }
 
 
-        $values = $form->getValues();
-
         $this->view->assign('form', $form);
 
+    }
+
+
+    public function deleteAction()
+    {
+
+        if ($this->getRequest()->isPost()) {
+            $id    = (int)$this->getParam('id');
+            $model = Core_Model_Factory::get('Topic');
+
+            $this->_beginTransaction();
+
+            $model->delete($model->find($id));
+
+            $this->_commit();
+
+        }
+
+        $this->redirect(
+            $this->_getReturnPath(
+                $this->view->url(array('controller' => 'topic'), 'default', true)
+            )
+        );
+    }
+
+
+    public function restoreAction()
+    {
+
+        if ($this->getRequest()->isPost()) {
+
+            $id    = (int)$this->getParam('id');
+            $model = Core_Model_Factory::get('Topic');
+
+            $this->_beginTransaction();
+
+            $model->restore($model->find($id));
+
+            $this->_commit();
+        }
+
+        $this->redirect(
+            $this->_getReturnPath(
+                $this->view->url(array('controller' => 'topic'), 'default', true)
+            )
+        );
     }
 
 }

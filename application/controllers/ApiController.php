@@ -66,7 +66,10 @@ class ApiController extends Custom_Controller_Action
             Zend_Registry::get('Redis')->rPush($ident, Zend_Json::encode($logInfo));
             restore_error_handler();
 
+            $this->_beginTransaction();
             call_user_func(array($model, $method), $data);
+            $this->_commit();
+
         } catch (Custom_Exception $ex) {
             Custom_Log::dbLog("Invalid input", Custom_Log::APP, $this->getAllParams());
             throw $ex;

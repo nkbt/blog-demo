@@ -5,7 +5,7 @@
 $topicList = $this->topicList;
 ?>
 <p class="lead">
-    <a class="btn btn-primary " href="<?php echo $this->url(array('controller' => $this->currentController(), 'action' => 'add'), 'default', true) ?>">Add
+    <a class="btn btn-primary " href="<?php echo $this->url(array('controller' => 'topic', 'action' => 'add'), 'default', true) ?>">Add
         topic</a>
 </p>
 
@@ -13,7 +13,7 @@ $topicList = $this->topicList;
     <?php foreach ($topicList as $topicEntity): ?>
         <?php $topicUrl = $this->url(array('controller' => $this->currentController(), 'action' => 'item', 'id' => $topicEntity->id), 'default', true) ?>
 
-        <div class="media <?php echo $topicEntity->isDeleted ? 'well well-small' : '' ?>">
+        <div class="media <?php echo $topicEntity->isDeleted ? 'deleted' : '' ?>">
             <a class="pull-left" href="<?php echo $topicUrl ?>">
                 <img class="media-object" data-src="holder.js/64x64">
             </a>
@@ -24,31 +24,31 @@ $topicList = $this->topicList;
                         <?php echo $this->escape($topicEntity->title) ?>
                     </a>
                     <small>
-                    <?php $editUrl = $this->url(
-                        array(
-                            'controller' => $this->currentController(), 
-                            'action' => 'edit', 
-                            'id' => $topicEntity->id
-                        ), 'default', true
-                    ) ?>                    
-                        <a href="<?php echo $editUrl ?>">Edit</a>                    
-                    </small>
-                        <?php $deleteUrl = $this->url(
+                        <?php $editUrl = $this->url(
                             array(
-                                'controller' => $this->currentController(), 
-                                'action' => $topicEntity->isDeleted ? 'restore' : 'delete', 
-                                'id' => $topicEntity->id
+                                'controller' => 'topic',
+                                'action'     => 'edit',
+                                'id'         => $topicEntity->id
                             ), 'default', true
                         ) ?>
-                        <form action="<?php echo $deleteUrl ?>" class="pull-right" method="post">
-                            <?php echo $this->formSubmit(
-                                null,
-                                $topicEntity->isDeleted ? 'restore' : 'delete',
-                                array(
-                                    'class' => 'btn btn-small'
-                                )
-                            ) ?>
-                        </form>
+                        <a href="<?php echo $editUrl ?>">Edit</a>
+                    </small>
+                    <?php $deleteUrl = $this->url(
+                        array(
+                            'controller' => 'topic',
+                            'action'     => $topicEntity->isDeleted ? 'restore' : 'delete',
+                            'id'         => $topicEntity->id
+                        ), 'default', true
+                    ) ?>
+                    <form action="<?php echo $deleteUrl ?>" class="pull-right" method="post">
+                        <?php echo $this->formSubmit(
+                            null,
+                            $topicEntity->isDeleted ? 'restore' : 'delete',
+                            array(
+                                'class' => 'btn btn-small'
+                            )
+                        ) ?>
+                    </form>
                 </h4>
                 <h5>
                     <em>
@@ -64,6 +64,8 @@ $topicList = $this->topicList;
                 </h5>
 
                 <p><?php echo nl2br(mb_strimwidth($topicEntity->text, 0, 200, "... <a href=\"$topicUrl\">Read more</a>")) ?></p>
+
+                <p>Comments: <em><?php echo $this->escape($topicEntity->countComment) ?></em></p>
             </div>
         </div>
 

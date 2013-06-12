@@ -1,5 +1,6 @@
 <?php
 /**
+ * @method Custom_View getView()
  */
 class Custom_Form extends Zend_Form
 {
@@ -48,7 +49,9 @@ class Custom_Form extends Zend_Form
                     array(
                         array('formButtons' => 'FormButtons'), array(
                         'button' => array(
-                            Custom_Form::BUTTON_SUBMIT => array('tag' => 'input', 'type' => 'submit', 'title' => 'Save', 'class' => 'form-submit btn btn-primary'),
+                            Custom_Form::BUTTON_SUBMIT => array(
+                                'tag' => 'input', 'type' => 'submit', 'title' => 'Save', 'class' => 'form-submit btn btn-primary'
+                            ),
                             Custom_Form::BUTTON_RESET  => array('tag' => 'input', 'type' => 'reset', 'title' => 'Reset', 'class' => 'form-reset btn'),
                         )
                     )
@@ -65,21 +68,25 @@ class Custom_Form extends Zend_Form
         $this->setElementDecorators(
             array(
                 array(array('field' => 'ViewHelper')),
-                array(array('errors' => 'Errors'), array(
-                    'class' => 'text-error',
-                    'elementStart' => '<div%s><em>',
-                    'elementEnd' => '</em></div>',
+                array(
+                    array('errors' => 'Errors'), array(
+                    'class'            => 'text-error',
+                    'elementStart'     => '<div%s><em>',
+                    'elementEnd'       => '</em></div>',
                     'elementSeparator' => '</em><br><em>',
-                )),      
+                )
+                ),
                 'Description',
                 array(
                     array('fieldContainer' => 'HtmlTag'),
                     array('tag' => 'span', 'class' => 'form-field')
                 ),
-                array(array('labelContainer' => 'Label'), array(
-                    'class' => 'form-label',
+                array(
+                    array('labelContainer' => 'Label'), array(
+                    'class'          => 'form-label',
                     'requiredSuffix' => ' *',
-                )),
+                )
+                ),
                 array(
                     array('clearDiv' => 'HtmlTag'),
                     array('placement' => Zend_Form_Decorator_HtmlTag::APPEND, 'tag' => 'div', 'class' => 'clear')

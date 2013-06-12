@@ -27,7 +27,7 @@ class Model_Comment_Entity extends Core_Model_Entity
     protected function _getId()
     {
 
-        return $this->idTopic;
+        return $this->idComment;
     }
 
 

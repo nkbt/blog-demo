@@ -157,16 +157,17 @@ class Core_Model
     final public function publish($eventName, $data)
     {
 
+        $date = date('Y-m-d:His');
+
         $ident = Zend_Registry::isRegistered('EventIdent')
             ? Zend_Registry::get('EventIdent')
-            : "Event";
+            : "Event:$date - $this->_name - $eventName";
         
-        $date = date('Y-m-d:His');
 
         /** @var Redis $redis */
         $client             = Zend_Registry::get('Redis');
         $eventEntity        = new Model_Api_Event_Entity();
-        $eventEntity->ident = "$ident:$date - $this->_name - $eventName";
+        $eventEntity->ident = $ident;
         $eventEntity->name  = $eventName;
         $eventEntity->node  = $data;
         $eventEntity->php   = base64_encode(serialize($data));
@@ -174,7 +175,7 @@ class Core_Model
         $keyName = $eventName . ":" . $this->getName();
 
         $logInfo = array(
-            'message' => 'PHP event published',
+            'message' => "PHP event published $keyName",
             'date' => date('r'),
             'name' => $keyName,
             'data' => print_r($data, true),
@@ -336,6 +337,32 @@ class Core_Model
         }
 
         return $result;
+    }
+    
+    
+    /**
+     * @param array $filter
+     *
+     * @throws Core_Model_Exception_Empty
+     * @throws Core_Model_Exception_Select
+     * @return Core_Model_Entity[]
+     */
+    final public function fetchCount(array $filter = array())
+    {
+
+        $select = $this->_table->select()
+            ->from($this->_tableName, array('count' => 'COUNT(1)'));
+        
+        $this->_applyFilter($select, $filter);
+
+        /** @var Zend_Db_Table_Rowset $rowset */
+        try {
+            $count = $this->_table->getAdapter()->fetchOne($select);
+        } catch (Exception $exc) {
+            throw new Core_Model_Exception_Select($exc->getMessage() . ' Query: ' . $select->assemble());
+        }
+
+        return $count;
     }
 
 

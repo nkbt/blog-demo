@@ -33,12 +33,16 @@ TODO
 - [x] Get working LAMP stack
 - [x] Base PHP core with sample data, running site
 - [x] Redis and PHPRedis
+- [x] Redis admin at http://localhost:10080/redis
 - [x] NodeJS 0.10 or newer
 - [x] NPM
 - [x] Forever
 - [x] Node app
 - [x] Sample subscribers
 - [x] PHP API controller to handle node callbacks
-- [ ] Counters recalculation
-- [ ] Counters display
-- [ ] Forms to add, edit, delete and restore entities
+- [x] Counters recalculation
+- [x] Counters display
+- [x] Topic: forms to add, edit, delete and restore
+- [x] Comment: forms to add, edit, delete and restore
+- [x] Dashboard for events chains at http://localhost:13000
+- [ ] User: forms to add, edit, delete and restore
