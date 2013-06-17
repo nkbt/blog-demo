@@ -97,7 +97,8 @@ class Model_Topic_Entity extends Core_Model_Entity
     {
 
         try {
-            return Core_Model_Factory::get('Comment')->fetchAll(array('idTopic' => $this->id), array('timestampAdd' => 'desc'));
+            return Core_Model_Factory::get('Comment')
+                ->fetchAll(array('idTopic' => $this->id), array('timestampAdd' => 'desc'));
         } catch (Core_Model_Exception_Empty $exc) {
             return array();
         }
