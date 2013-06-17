@@ -1,8 +1,0 @@
-.navbar .nav > .active > a { }
-.navbar .nav > .active > ul { float: left; list-style: none; margin-top: -15px; margin-left: 0; font-size: 90%; }
-.navbar .nav > .active > ul > li { float: left; }
-.navbar .nav > .active > ul > li > a { display: block; padding: 10px 15px; color: #999999; text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); }
-.navbar .nav > .active > ul > li.active > a { color: #FFFFFF; }
-
-
-.deleted .media-heading {text-decoration: line-through;}
